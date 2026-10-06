@@ -1,0 +1,20 @@
+.env
+backend/.env
+node_modules/
+dist/
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.tsbuildinfo
+.DS_Store
+
+# pr-team / app stack runtime files
+.env.slot
+.claude/pr-team/state.json
+.claude/pr-team/shots/
+.claude/worktrees/
+
+# reference clones (plugin source, template)
+/archive/
