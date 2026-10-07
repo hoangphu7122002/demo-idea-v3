@@ -58,7 +58,8 @@ def test_reset_reseeds_when_demo_mode_on() -> None:
         assert _counts() == (4, 1)
 
 
-def test_demo_mode_defaults_to_off() -> None:
+def test_demo_mode_defaults_to_off(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("DEMO_MODE", raising=False)
     assert DemoSettings(_env_file=None).demo_mode is False
 
 
