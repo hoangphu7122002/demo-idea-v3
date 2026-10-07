@@ -4,6 +4,7 @@ Run with ``uv run pytest app/seed`` (pyproject testpaths only covers ``tests``).
 """
 
 import os
+import uuid
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -14,9 +15,11 @@ os.environ["DATABASE_URL"] = os.environ["TEST_DATABASE_URL"]
 os.environ["DB_NULL_POOL"] = "1"
 
 from sqlalchemy import func, select  # noqa: E402
+from sqlalchemy.orm import Session  # noqa: E402
 
+from app.content.split import split_blocks  # noqa: E402
 from app.core.db import SyncSessionLocal, sync_engine  # noqa: E402
-from app.models import Base, Post, User  # noqa: E402
+from app.models import Base, Paragraph, Post, User  # noqa: E402
 from app.seed.service import reseed, seed_if_empty  # noqa: E402
 
 SLUGS = [
@@ -83,3 +86,44 @@ def test_reseed_bad_seed_dir_keeps_data(tmp_path: Path) -> None:
     with pytest.raises(ValueError):
         reseed(tmp_path)
     assert _counts() == (4, 1)
+
+
+def _paragraphs(s: Session, post_id: int) -> list[Paragraph]:
+    stmt = select(Paragraph).where(Paragraph.post_id == post_id).order_by(Paragraph.position)
+    return list(s.scalars(stmt))
+
+
+def test_paragraphs_created_for_each_post() -> None:
+    seed_if_empty()
+    with SyncSessionLocal() as s:
+        posts = s.scalars(select(Post)).all()
+        assert len(posts) == 4
+        for post in posts:
+            blocks = split_blocks(post.body_md)
+            assert blocks
+            assert len(_paragraphs(s, post.id)) == len(blocks), post.slug
+
+
+def test_paragraph_positions_are_contiguous_from_zero() -> None:
+    seed_if_empty()
+    with SyncSessionLocal() as s:
+        for post in s.scalars(select(Post)):
+            positions = [p.position for p in _paragraphs(s, post.id)]
+            assert positions == list(range(len(positions))), post.slug
+
+
+def test_paragraph_ids_persisted_and_unique() -> None:
+    seed_if_empty()
+    with SyncSessionLocal() as s:
+        ids = list(s.scalars(select(Paragraph.id)))
+    assert ids
+    assert all(isinstance(i, uuid.UUID) for i in ids)
+    assert len(set(ids)) == len(ids)
+
+
+def test_paragraph_source_matches_blocks_in_order() -> None:
+    seed_if_empty()
+    with SyncSessionLocal() as s:
+        for post in s.scalars(select(Post)):
+            sources = [p.source for p in _paragraphs(s, post.id)]
+            assert sources == split_blocks(post.body_md), post.slug
