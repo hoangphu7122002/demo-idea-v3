@@ -8,8 +8,9 @@ from pathlib import Path
 from sqlalchemy import func, select, text
 from sqlalchemy.orm import Session
 
+from app.content.split import split_blocks
 from app.core.db import SyncSessionLocal
-from app.models import Post, User
+from app.models import Paragraph, Post, User
 
 SEED_DIR = Path(__file__).resolve().parents[2] / "seed"
 
@@ -50,7 +51,12 @@ def _load(session: Session, seed_dir: Path) -> None:
     session.flush()
     for path in sorted((seed_dir / "posts").glob("*.md")):
         meta, body = _read_post(path)
-        session.add(Post(slug=meta["slug"], title=meta["title"], body_md=body, author_id=user.id))
+        post = Post(slug=meta["slug"], title=meta["title"], body_md=body, author_id=user.id)
+        session.add(post)
+        session.flush()
+        blocks = split_blocks(body)
+        for position, source in enumerate(blocks):
+            session.add(Paragraph(post_id=post.id, position=position, source=source))
 
 
 def reseed(seed_dir: Path = SEED_DIR) -> None:
