@@ -19,3 +19,4 @@ Problems / plugin improvements:
 
 ## 2026-10-06 · demo-idea-v3 · start
 - 21:26 · setup · v3 created from demo-idea-v2 @ a200718 (lean-web-stack + demo-scope outputs + roadmap, no feature code) · new ports API 8020 / web 5193 / DB 5472 / Redis 6419, stack slots 8300+/5400+ · next: build with a different method than pr-team
+- 15:35 · setup · focus init: config (test cmd without docker, smoke, chat vi, wip 4/3, stack slots), lessons copied from v2 (20), infra up via stack, template refreshed · tests pass in a stack slot

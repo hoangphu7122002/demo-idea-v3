@@ -1,0 +1,47 @@
+{
+  "testCommand": "cd backend && uv run ruff check . && uv run ruff format --check . && uv run mypy app tests && uv run pytest -q && cd ../frontend && npm run lint && npm run typecheck && npm test",
+  "baseBranch": "main",
+  "language": {
+    "chat": "vi",
+    "code": "en"
+  },
+  "smokeCommand": "cd backend && uv run ruff check . && uv run ruff format --check . && uv run mypy app tests && uv run pytest -q && cd ../frontend && npm run lint && npm run typecheck && npm test",
+  "roadmap": "scope/2026-10-05-tech-blog-correctness/roadmap.md",
+  "resources": {},
+  "worker": {
+    "allowedTools": [
+      "Bash(npm run:*)",
+      "Bash(npm test:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(npm ci)",
+      "Bash(npm install)",
+      "Bash(npx tsc:*)",
+      "Bash(npx vitest:*)",
+      "Bash(npx eslint:*)",
+      "Bash(npx playwright:*)",
+      "Bash(node:*)",
+      "Bash(uv run:*)",
+      "Bash(uv sync)",
+      "Bash(pytest:*)",
+      "Bash(python -m pytest:*)",
+      "Bash(ruff:*)",
+      "Bash(mypy:*)",
+      "Bash(make check:*)",
+      "Bash(make test:*)",
+      "Bash(make lint:*)",
+      "Bash(make gen:*)",
+      "Bash(make build:*)",
+      "Bash(cd:*)",
+      "Bash(npm --prefix:*)"
+    ]
+  },
+  "worktreeSetup": "uv sync -q --directory backend && npm ci --silent --prefix frontend",
+  "slots": {
+    "stack": "auto",
+    "count": 5
+  },
+  "wip": {
+    "running": 4,
+    "reviewCap": 3
+  }
+}
